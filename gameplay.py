@@ -1,6 +1,8 @@
 import numpy as np
 import tkinter as tk
 from playfield import Playfield
+from tetromino import Tetromino
+import random
 
 class Tetris: 
 
@@ -12,6 +14,7 @@ class Tetris:
         self.canvas.pack()
         self.pf = Playfield()
         self.draw_pf()
+        self.draw_tetromino()
 
         self.root.mainloop()
 
@@ -22,6 +25,14 @@ class Tetris:
             for j in range(self.pf.pf.shape[1]):
                 self.canvas.create_rectangle(j * self._block_size, i * self._block_size, (j + 1) * self._block_size, (i + 1) * self._block_size, fill=self._color_dict[self.pf.pf[i,j]])
 
+    def draw_tetromino(self):
+        t = Tetromino(random.randint(1,7), random.randint(0,3))
+        print(t.block)
+        for i in range(t.block.shape[0]):
+            for j in range(t.block.shape[1]):
+                if t.block[i,j] != 0:
+                    self.canvas.create_rectangle(j * self._block_size, i * self._block_size, (j + 1) * self._block_size, (i + 1) * self._block_size, fill=self._color_dict[t.block[i,j]])
+        
 
 if __name__ == "__main__":
     tetris = Tetris()
