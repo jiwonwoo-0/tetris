@@ -15,11 +15,11 @@ class Tetromino:
         self.letter = letter
         self.orientation = orientation
         self.get_shape()
+        self.r = 0
+        self.c = 0
         
 
     def get_shape(self):
         self.block = self._shape_dict[self.letter]
-        print(self.block)
         self.block = np.rot90(self.block, k=self.orientation)
-        print(self.block)
 
