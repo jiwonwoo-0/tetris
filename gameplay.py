@@ -13,59 +13,97 @@ class Tetris:
         self._block_size = block_size
         self.canvas = tk.Canvas(self.root, width=10*self._block_size, height=20*self._block_size)
         self.canvas.pack()
-
+        self.tags = ['a','b','c','d']
         self.pf = Playfield()
         self.draw_pf()
-        self.ts = {0: Tetromino(random.randint(1,7))}
-        self.draw_tetromino(len(self.ts)-1)
-        self.gravity(len(self.ts)-1)
+        
+        self.t = Tetromino(random.randint(1,7))
+        
+        self.draw_tetromino()
+        self.gravity()
+
+        self.root.bind("<Left>", self.left)
+        self.root.bind("<Right>", self.right)
+        self.root.bind("<Up>", self.rotate_t)
         
 
     def draw_pf(self):
         '''creates playfield'''
-        # self.canvas.delete("all")
+        for tag in self.tags:
+            self.canvas.delete(tag)
         for i in range(self.pf.pf.shape[0]):
             for j in range(self.pf.pf.shape[1]):
-                self.canvas.create_rectangle(j * self._block_size, i * self._block_size, (j + 1) * self._block_size, (i + 1) * self._block_size, fill=self._color_dict[self.pf.pf[i,j]])
+                if self.pf.pf[i,j] != 0:
+                    self.canvas.create_rectangle(j * self._block_size, i * self._block_size, (j + 1) * self._block_size, (i + 1) * self._block_size, fill=self._color_dict[self.pf.pf[i,j]])
 
-    def draw_tetromino(self, key):
-        t = self.ts[key]
-        tags = [key+0.1*i for i in range(4)]
+    def draw_tetromino(self):
         idx = 0
-        for tag in tags:
+        for tag in self.tags:
             self.canvas.delete(tag)
-        for i in range(t.block.shape[0]):
-            for j in range(t.block.shape[1]):
-                if t.block[i,j] != 0:
-                    self.canvas.create_rectangle((j+t.c) * self._block_size, 
-                                                 (i+t.r) * self._block_size, 
-                                                 ((j+t.c) + 1) * self._block_size, 
-                                                 ((i+t.r)+ 1) * self._block_size, 
-                                                 fill=self._color_dict[t.block[i,j]], tags=tags[idx])
+        for i in range(self.t.block.shape[0]):
+            for j in range(self.t.block.shape[1]):
+                if self.t.block[i,j] != 0:
+                    self.canvas.create_rectangle((j+self.t.c) * self._block_size, 
+                                                 (i+self.t.r) * self._block_size, 
+                                                 ((j+self.t.c) + 1) * self._block_size, 
+                                                 ((i+self.t.r)+ 1) * self._block_size, 
+                                                 fill=self._color_dict[self.t.block[i,j]], tags=self.tags[idx])
                     idx +=1
 
-    def gravity(self, key):
+    def gravity(self):
         ''
-        if self.check_pf(self.ts[key]): #add or hits solid
-            self.draw_tetromino(key)
-            self.root.after(500, lambda: self.gravity(key))
-            self.ts[key].r += 1
-        else: 
-            self.pf.update_pf(self.ts[key])
+        if self.check_edge() and self.check_hit(): #add or hits solid
+            self.draw_tetromino()
+            self.root.after(500, lambda: self.gravity())
+            self.t.r += 1
+        else:
+            self.pf.update_pf(self.t)
             self.draw_pf()
-            self.ts[key+1] = Tetromino(random.randint(1, 7))
-            self.draw_tetromino(key+1)
-            self.root.after(500, lambda: self.gravity(key+1))
+            self.t = Tetromino(random.randint(1, 7))
+            self.draw_tetromino()
+            self.root.after(500, lambda: self.gravity())
     
-    def check_pf(self, t):
-        if t.r + t.block.shape[0] >= 20:
+    def check_edge(self):
+        if self.t.r + self.t.block.shape[0] >= 20:
             return False
-        for i in range(t.block.shape[0]):
-            for j in range(t.block.shape[1]):
-                if (t.block[i,j] != 0) and (self.pf.pf[i+t.r+1, j+t.c] != 0):
+        if (self.t.c < 0) or (self.t.c + self.t.block.shape[1]) > 10:
+            return False
+        return True
+    
+    def check_hit(self):
+        for i in range(self.t.block.shape[0]):
+            for j in range(self.t.block.shape[1]):
+                if (self.t.block[i,j] != 0) and (self.pf.pf[i+self.t.r+1, j+self.t.c] != 0):
                     return False
         return True
-        
+    
+    def left(self, event):
+        self.t.c -= 1
+        if self.check_edge():
+            self.draw_tetromino()
+        else:
+            self.t.c += 1
+
+    def right(self, event):
+        self.t.c += 1
+        if self.check_edge():
+            self.draw_tetromino()
+        else:
+            self.t.c -= 1
+    
+    def rotate_t(self, event):
+        self.t.rotate()
+        if self.check_edge():
+            if self.check_hit():
+                self.draw_tetromino()
+            else:
+                self.pf.update_pf(self.t)
+                self.draw_pf()
+                self.t = Tetromino(random.randint(1, 7))
+                self.draw_tetromino()
+                self.root.after(500, lambda: self.gravity())
+        else: 
+            self.t.rotate(-1)
 
 
 if __name__ == "__main__":

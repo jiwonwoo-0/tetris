@@ -22,4 +22,8 @@ class Tetromino:
     def get_shape(self):
         self.block = self._shape_dict[self.letter]
         self.block = np.rot90(self.block, k=self.orientation)
+    
+    def rotate(self, k = 1):
+        self.orientation += k
+        self.block = np.rot90(self.block, k=k)
 
