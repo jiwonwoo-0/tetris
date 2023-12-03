@@ -1,9 +1,25 @@
 import numpy as np
 
 class Tetromino: 
+    """
+    Tetromino piece
 
+    Attributes:
+        _shape_dict (dict): map of tetromino type to shapes
+        letter (int): letter (coded to a number) representing tetromino type
+        orientation (int): current orientation of tetromino (0, 1, 2, or 3)
+        block (numpy.ndarray): current tetromino shape
+        r (int): Row index of tetromino in playfield
+        c (int): Column index of tetromino in playfield
+    """
     def __init__(self, letter, orientation = 0):
-        ''''''
+        """
+        Initializes a Tetromino with a specified letter and orientation
+
+        Parameters:
+            letter (int): letter (coded to a number) representing tetromino type
+            orientation (int): current orientation of tetromino (0, 1, 2, or 3)
+        """
         self._shape_dict = {1:[[1,1,1,1]],
                             2:[[2,0,0],[2,2,2]],
                             3:[[0,0,3],[3,3,3]],
@@ -20,10 +36,19 @@ class Tetromino:
         
 
     def get_shape(self):
+        """
+        Sets current shape of tetromino based on its letter and orientation
+        """
         self.block = self._shape_dict[self.letter]
         self.block = np.rot90(self.block, k=self.orientation)
     
     def rotate(self, k = 1):
+        """
+        Rotates the tetromino 90-degrees clockwise k times
+
+        Parameters:
+            k (int): Number of rotations
+        """
         self.orientation += k
         self.block = np.rot90(self.block, k=k)
 
