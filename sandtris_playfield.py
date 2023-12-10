@@ -27,6 +27,45 @@ class Sandtris_Playfield:
                 if t.block[i,j] != 0:
                     self.pf[i+t.r, j+t.c] = t.block[i,j]
     
+    def gaps(self):
+        orig_pf = self.pf.copy()
+        for col in range(self.pf.shape[1]): 
+            arr = self.pf[:,col]
+            arr = arr[np.argmax(arr != 0):] if np.any(arr != 0) else np.array([])
+            zero_ind = np.where(arr == 0)[0]
+            arr = np.delete(arr, zero_ind[0]) if len(zero_ind) > 0 else arr
+            new_col = np.pad(arr, (self.pf.shape[0] - len(arr), 0), 'constant')
+            self.pf[:,col] = new_col
+        return np.array_equal(orig_pf, self.pf)
+    
+    def gaps(self):
+        orig_pf = self.pf.copy()
+        for col in range(self.pf.shape[1]): 
+            arr = self.pf[:,col]
+            arr = arr[np.argmax(arr != 0):] if np.any(arr != 0) else np.array([])
+            zero_ind = np.where(arr == 0)[0]
+            arr = np.delete(arr, zero_ind[0]) if len(zero_ind) > 0 else arr
+            new_col = np.pad(arr, (self.pf.shape[0] - len(arr), 0), 'constant')
+            self.pf[:,col] = new_col
+        return np.array_equal(orig_pf, self.pf)
+
+    def gravity(self):
+        orig_pf = self.pf.copy()
+        for col in range(self.pf.shape[1]): 
+            non_zeros = self.pf[np.nonzero(self.pf[:, col])][:, col]
+            neighbors = {}
+            neighbors[1] = len(non_zeros) - np.count_nonzero(self.pf[:,col+1]) if col + 1 < self.pf.shape[1] else 0
+            neighbors[-1] = len(non_zeros) - np.count_nonzero(self.pf[:,col-1]) if col - 1 >= 0 else 0
+            max_diff = max(neighbors, key=neighbors.get)
+            if neighbors[max_diff] > 1:
+                new_neighbor = np.insert(self.pf[np.nonzero(self.pf[:, col+max_diff])][:, col+max_diff], 0, non_zeros[0])
+                new_neighbor = np.pad(new_neighbor, (self.pf.shape[0] - len(new_neighbor), 0), 'constant')
+                new_col = np.delete(non_zeros, 0)
+                new_col = np.pad(new_col, (self.pf.shape[0] - len(new_col), 0), 'constant')
+                self.pf[:,col] = new_col
+                self.pf[:,col+max_diff] = new_neighbor
+        return ~np.array_equal(orig_pf, self.pf)    
+    
     def clear_line(self, rows):
         """
         Deletes lines from playfield

@@ -44,9 +44,10 @@ class Tetris:
         self.score = 0
         self.score_dict = {1:100,2:300,3:500,4:800}
         self.gameover = False
-
+        self.gravity_flag = False
+        self.cascade_flag = False
         self.canvas = tk.Canvas(self.root, width=10*self._block_size, height=20*self._block_size)
-
+        
         self.line_label = tk.Label(self.root, text="Lines: 0")
         self.line_label.pack(side="top")
         self.level_label = tk.Label(self.root, text="Level: 1")
@@ -94,6 +95,26 @@ class Tetris:
                     self.pf_tags.append('pf'+str(len(self.pf_tags)))
                     self.canvas.create_rectangle(j * self._block_size/self.pf.scale, i * self._block_size/self.pf.scale, (j + 1) * self._block_size/self.pf.scale, (i + 1) * self._block_size/self.pf.scale, fill=self._color_dict[self.pf.pf[i,j]], tags = self.pf_tags[-1])
 
+    def sand_gravity(self):
+        same = self.pf.gaps()
+        if not same: 
+            self.gravity_flag = True
+            self.draw_pf()
+            self.root.after(int(250/self.level), lambda: self.sand_gravity())
+        else:
+            self.gravity_flag = False
+            if self.cascade_flag == False:
+                self.root.after(int(500/self.level), lambda: self.cascade())
+        
+
+    def cascade(self):
+        change = self.pf.gravity()
+        if change: 
+            self.draw_pf()
+            self.root.after(int(500/self.level), lambda: self.cascade())
+        else: 
+            self.cascade_flag = False
+
     def draw_tetromino(self):
         """
         Draws falling tetromino
@@ -126,6 +147,8 @@ class Tetris:
             self.t.r -= 1
             self.pf.add_t(self.t)
             self.draw_pf()
+            if self.gravity_flag == False:
+                self.sand_gravity()
             self.t = Sandtromino(random.randint(1, 7))
             self.draw_tetromino()
             self.root.after(int(500/self.level), lambda: self.gravity())
@@ -216,7 +239,7 @@ class Tetris:
         """
         lines = []
         for i, row in enumerate(self.pf.pf):
-            if np.count_nonzero(row) == 10:
+            if np.count_nonzero(row) == self.pf.pf.shape[0]:
                 lines.append(i)
         if len(lines) != 0: 
             self.lines += len(lines)
@@ -224,6 +247,8 @@ class Tetris:
             if self.lines >= self.level * 10:
                 self.level += 1
             self.pf.clear_line(lines)
+            self.draw_pf()
+            self.sand_gravity()
             self.draw_pf()
 
 
