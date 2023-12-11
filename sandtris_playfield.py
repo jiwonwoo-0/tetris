@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.ndimage import label
 
 class Sandtris_Playfield:
     """
@@ -29,33 +30,21 @@ class Sandtris_Playfield:
     
     def gaps(self):
         orig_pf = self.pf.copy()
+        cascade_idx = []
         for col in range(self.pf.shape[1]): 
+            orig_col = self.pf[:,col].copy()
             arr = self.pf[:,col]
             arr = arr[np.argmax(arr != 0):] if np.any(arr != 0) else np.array([])
             zero_ind = np.where(arr == 0)[0]
             arr = np.delete(arr, zero_ind[0]) if len(zero_ind) > 0 else arr
             new_col = np.pad(arr, (self.pf.shape[0] - len(arr), 0), 'constant')
-            self.pf[:,col] = new_col
-        return np.array_equal(orig_pf, self.pf)
-    
-    def gaps(self):
-        orig_pf = self.pf.copy()
-        for col in range(self.pf.shape[1]): 
-            arr = self.pf[:,col]
-            arr = arr[np.argmax(arr != 0):] if np.any(arr != 0) else np.array([])
-            zero_ind = np.where(arr == 0)[0]
-            arr = np.delete(arr, zero_ind[0]) if len(zero_ind) > 0 else arr
-            new_col = np.pad(arr, (self.pf.shape[0] - len(arr), 0), 'constant')
-            self.pf[:,col] = new_col
-        return np.array_equal(orig_pf, self.pf)
-
-    def gravity(self):
-        orig_pf = self.pf.copy()
-        for col in range(self.pf.shape[1]): 
+            if np.array_equal(orig_col, new_col): cascade_idx.append(col)
+            else: self.pf[:,col] = new_col
+        for col in cascade_idx:
             non_zeros = self.pf[np.nonzero(self.pf[:, col])][:, col]
             neighbors = {}
-            neighbors[1] = len(non_zeros) - np.count_nonzero(self.pf[:,col+1]) if col + 1 < self.pf.shape[1] else 0
-            neighbors[-1] = len(non_zeros) - np.count_nonzero(self.pf[:,col-1]) if col - 1 >= 0 else 0
+            neighbors[1] = len(non_zeros) - np.count_nonzero(self.pf[:,col+1]) if (col + 1 < self.pf.shape[1]) & (col + 1 in cascade_idx) else 0
+            neighbors[-1] = len(non_zeros) - np.count_nonzero(self.pf[:,col-1]) if col - 1 >= 0 & (col - 1 in cascade_idx) else 0
             max_diff = max(neighbors, key=neighbors.get)
             if neighbors[max_diff] > 1:
                 new_neighbor = np.insert(self.pf[np.nonzero(self.pf[:, col+max_diff])][:, col+max_diff], 0, non_zeros[0])
@@ -64,17 +53,26 @@ class Sandtris_Playfield:
                 new_col = np.pad(new_col, (self.pf.shape[0] - len(new_col), 0), 'constant')
                 self.pf[:,col] = new_col
                 self.pf[:,col+max_diff] = new_neighbor
-        return ~np.array_equal(orig_pf, self.pf)    
+        return np.array_equal(orig_pf, self.pf)
     
-    def clear_line(self, rows):
+    def clear_line(self, letter):
         """
         Deletes lines from playfield
 
         Parameters:
             rows (list): List of row indices to be deleted
         """
-        self.pf = np.delete(self.pf, rows, 0)
-        self.pf = np.insert(self.pf, np.zeros_like(rows), np.zeros(10), 0)
+        orig_pf = self.pf.copy()
+        orig_pf[orig_pf != letter] = 0
+        labeled_array, num_features = label(orig_pf)
+        lines = []
+        for i in range(1, num_features + 1):
+            group = (labeled_array == i)
+            if np.count_nonzero(np.count_nonzero(group, axis=0)) == self.pf.shape[1]:
+                self.pf[group] = 0
+                lines.append(min(np.count_nonzero(group, axis=0)))
+        return lines
+
 
     def game_over(self):
         """

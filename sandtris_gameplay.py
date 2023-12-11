@@ -17,7 +17,6 @@ class Tetris:
         level (int): current game level
         score (int): current game score
         gameover (bool): flag for if game is over
-        score_dict (dict): map of number of cleared lines to score
         canvas (Canvas): Tkinter canvas for playfield
         line_label (Label): Tkinter label for lines
         level_label (Label): Tkinter label  for level
@@ -28,7 +27,7 @@ class Tetris:
         t (Sandtromino): current Sandtromino player controls
     """
 
-    def __init__(self, root, block_size = 30):
+    def __init__(self, root, block_size = 30, scale = 5):
         """
         Initializes Tetris game
 
@@ -39,10 +38,10 @@ class Tetris:
         self._color_dict = {-1: 'black', 0:'white',1:'cyan',2:'blue',3:'orange',4:'yellow',5:'green',6:'purple',7:'red'}
         self.root = root
         self._block_size = block_size
+        self.scale = scale
         self.lines = 0
         self.level = 1
         self.score = 0
-        self.score_dict = {1:100,2:300,3:500,4:800}
         self.gameover = False
         self.gravity_flag = False
         self.cascade_flag = False
@@ -59,9 +58,9 @@ class Tetris:
         self.tags = []
         self.pf_tags = []
 
-        self.pf = Sandtris_Playfield()
+        self.pf = Sandtris_Playfield(scale = self.scale)
         self.draw_pf()
-        self.t = Sandtromino(random.randint(1,7))
+        self.t = Sandtromino(random.randint(1,7), scale = self.scale)
         self.draw_tetromino()
         self.gravity()
         
@@ -93,28 +92,20 @@ class Tetris:
             for j in range(self.pf.pf.shape[1]):
                 if self.pf.pf[i,j] != 0:
                     self.pf_tags.append('pf'+str(len(self.pf_tags)))
-                    self.canvas.create_rectangle(j * self._block_size/self.pf.scale, i * self._block_size/self.pf.scale, (j + 1) * self._block_size/self.pf.scale, (i + 1) * self._block_size/self.pf.scale, fill=self._color_dict[self.pf.pf[i,j]], tags = self.pf_tags[-1])
+                    self.canvas.create_rectangle(j * self._block_size/self.scale, i * self._block_size/self.scale, (j + 1) * self._block_size/self.scale, (i + 1) * self._block_size/self.scale, fill=self._color_dict[self.pf.pf[i,j]], tags = self.pf_tags[-1])
+        self.check_line_clear()
 
     def sand_gravity(self):
+        if self.gameover == True: 
+            return
         same = self.pf.gaps()
         if not same: 
             self.gravity_flag = True
             self.draw_pf()
-            self.root.after(int(250/self.level), lambda: self.sand_gravity())
+            self.root.after(int((300/self.scale)/self.level), lambda: self.sand_gravity())
         else:
             self.gravity_flag = False
-            if self.cascade_flag == False:
-                self.root.after(int(500/self.level), lambda: self.cascade())
         
-
-    def cascade(self):
-        change = self.pf.gravity()
-        if change: 
-            self.draw_pf()
-            self.root.after(int(500/self.level), lambda: self.cascade())
-        else: 
-            self.cascade_flag = False
-
     def draw_tetromino(self):
         """
         Draws falling tetromino
@@ -128,12 +119,11 @@ class Tetris:
                 for j in range(self.t.block.shape[1]):
                     if self.t.block[i,j] != 0:
                         self.tags.append('t'+str(len(self.tags)))
-                        self.canvas.create_rectangle((j+self.t.c) * self._block_size/self.t.scale, 
-                                                    (i+self.t.r) * self._block_size/self.t.scale, 
-                                                    ((j+self.t.c) + 1) * self._block_size/self.t.scale, 
-                                                    ((i+self.t.r)+ 1) * self._block_size/self.t.scale, 
+                        self.canvas.create_rectangle((j+self.t.c) * self._block_size/self.scale, 
+                                                    (i+self.t.r) * self._block_size/self.scale, 
+                                                    ((j+self.t.c) + 1) * self._block_size/self.scale, 
+                                                    ((i+self.t.r)+ 1) * self._block_size/self.scale, 
                                                     fill=self._color_dict[self.t.block[i,j]], tags=self.tags[-1])
-        self.check_line_clear()
 
     def gravity(self):
         """
@@ -142,16 +132,16 @@ class Tetris:
         self.t.r += 1
         if self.check_edge() and self.check_hit(): #add or hits solid
             self.draw_tetromino()
-            self.root.after(int(500/self.level), lambda: self.gravity())
+            self.root.after(int((1000/self.scale)/self.level), lambda: self.gravity())
         else:
             self.t.r -= 1
             self.pf.add_t(self.t)
             self.draw_pf()
             if self.gravity_flag == False:
                 self.sand_gravity()
-            self.t = Sandtromino(random.randint(1, 7))
+            self.t = Sandtromino(random.randint(1, 7), scale = self.scale)
             self.draw_tetromino()
-            self.root.after(int(500/self.level), lambda: self.gravity())
+            self.root.after(int((1000/self.scale)/self.level), lambda: self.gravity())
     
     def check_edge(self):
         """
@@ -238,21 +228,21 @@ class Tetris:
         Checks for completed lines in the playfield and updates the playfield. Updates lines, level, and score. 
         """
         lines = []
-        for i, row in enumerate(self.pf.pf):
-            if np.count_nonzero(row) == self.pf.pf.shape[0]:
-                lines.append(i)
+        for letter in range(1,8):
+            cleared_lines = self.pf.clear_line(letter)
+            if len(cleared_lines) > 0: lines.append(cleared_lines)
         if len(lines) != 0: 
-            self.lines += len(lines)
-            self.score += self.score_dict[len(lines)] * self.level
-            if self.lines >= self.level * 10:
-                self.level += 1
-            self.pf.clear_line(lines)
+            for line in lines:
+                self.lines += sum(line)
+                self.score += sum(line) * self.level *100
+                if self.lines >= self.level * 10:
+                    self.level += 1
             self.draw_pf()
-            self.sand_gravity()
-            self.draw_pf()
+            if self.gravity_flag == False:
+                self.sand_gravity()
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    tetris = Tetris(root)
+    tetris = Tetris(root, scale =3)
     root.mainloop()
