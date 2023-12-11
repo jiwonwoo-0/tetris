@@ -2,15 +2,15 @@ import numpy as np
 
 class Sandtromino: 
     """
-    Tetromino piece
+    Sandtromino piece
 
     Attributes:
         _shape_dict (dict): map of tetromino type to shapes
         letter (int): letter (coded to a number) representing tetromino type
         orientation (int): current orientation of tetromino (0, 1, 2, or 3)
         block (numpy.ndarray): current tetromino shape
-        r (int): Row index of tetromino in playfield
-        c (int): Column index of tetromino in playfield
+        r (int): Row index of tetromino in the playfield
+        c (int): Column index of tetromino in the playfield
     """
     def __init__(self, letter, orientation = 0, scale = 3):
         """
@@ -19,6 +19,7 @@ class Sandtromino:
         Parameters:
             letter (int): letter (coded to a number) representing tetromino type
             orientation (int): current orientation of tetromino (0, 1, 2, or 3)
+            scale (int): scaling factor for the tetromino
         """
         self.letter = letter
         self.scale = scale

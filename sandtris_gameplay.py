@@ -5,9 +5,9 @@ from sandtromino import Sandtromino
 import random
 import time
 
-class Tetris: 
+class Sandtris: 
     """
-    Tetris gameplay
+    Sandtris gameplay
 
     Attributes:
         root (Tk): main Tkinter window
@@ -16,13 +16,15 @@ class Tetris:
         lines (int): total number of cleared lines
         level (int): current game level
         score (int): current game score
-        gameover (bool): flag for if game is over
-        canvas (Canvas): Tkinter canvas for playfield
+        gameover (bool): flag for if the game is over
+        gravity_flag (bool): flag for ongoing gravity effect
+        cascade_flag (bool): flag for cascading effect
+        canvas (Canvas): Tkinter canvas for the playfield
         line_label (Label): Tkinter label for lines
-        level_label (Label): Tkinter label  for level
-        score_label (Label): Tkinter label for score
-        tags (list): list of tags for blocks in current tetromino 
-        pf_tags (list): list of tags for blocks in playfield 
+        level_label (Label): Tkinter label for the level
+        score_label (Label): Tkinter label for the score
+        tags (list): list of tags for blocks in the current tetromino 
+        pf_tags (list): list of tags for blocks in the playfield 
         pf (Sandtris_Playfield): current Sandtris_Playfield with permanent blocks/background
         t (Sandtromino): current Sandtromino player controls
     """
@@ -34,6 +36,7 @@ class Tetris:
         Parameters:
             root (Tk): main Tkinter window
             block_size (int): size of each block in the playfield
+            scale (int): scaling factor for the playfield
         """
         self._color_dict = {-1: 'black', 0:'white',1:'cyan',2:'blue',3:'orange',4:'yellow',5:'green',6:'purple',7:'red'}
         self.root = root
@@ -96,6 +99,10 @@ class Tetris:
         self.check_line_clear()
 
     def sand_gravity(self):
+        """
+        Initiates gravity effect for sand-like falling blocks. 
+        Continues until blocks reach a stable position or the game is over.
+        """
         if self.gameover == True: 
             return
         same = self.pf.gaps()
@@ -244,5 +251,5 @@ class Tetris:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    tetris = Tetris(root, scale =3)
+    tetris = Sandtris(root, scale =3)
     root.mainloop()

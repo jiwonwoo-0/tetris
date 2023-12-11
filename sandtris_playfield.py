@@ -3,7 +3,7 @@ from scipy.ndimage import label
 
 class Sandtris_Playfield:
     """
-    Playfield grid for tetris game
+    Playfield grid for sandtris game
 
     Attributes:
         pf (numpy.ndarray): 2D array representing the playfield
@@ -12,6 +12,9 @@ class Sandtris_Playfield:
     def __init__(self, scale =3):
         """
         Initializes the Playfield with an empty 20x10 grid
+
+        Parameters:
+            scale (int): Scaling factor for the playfield
         """
         self.scale = scale
         self.pf = np.zeros((20*scale, 10*scale))
@@ -21,7 +24,7 @@ class Sandtris_Playfield:
         Adds a Tetromino to the playfield
 
         Parameters:
-            t (Tetromino): Tetromino added to playfield
+            t (Sandtromino): Tetromino added to the playfield
         """
         for i in range(t.block.shape[0]):
             for j in range(t.block.shape[1]):
@@ -29,6 +32,10 @@ class Sandtris_Playfield:
                     self.pf[i+t.r, j+t.c] = t.block[i,j]
     
     def gaps(self):
+        """
+        Applies gravity and cascade effects to the playfield.
+        Returns True if the playfield remains unchanged after the effects.
+        """
         orig_pf = self.pf.copy()
         cascade_idx = []
         for col in range(self.pf.shape[1]): 
@@ -57,10 +64,10 @@ class Sandtris_Playfield:
     
     def clear_line(self, letter):
         """
-        Deletes lines from playfield
+        Deletes lines from the playfield based on the specified letter.
 
         Parameters:
-            rows (list): List of row indices to be deleted
+            letter (int): Letter representing the Tetromino type
         """
         orig_pf = self.pf.copy()
         orig_pf[orig_pf != letter] = 0
