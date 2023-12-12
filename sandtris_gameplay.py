@@ -1,9 +1,7 @@
-import numpy as np
 import tkinter as tk
 from sandtris_playfield import Sandtris_Playfield
 from sandtromino import Sandtromino
 import random
-import time
 
 
 class Sandtris:
@@ -128,7 +126,7 @@ class Sandtris:
         Initiates gravity effect for sand-like falling blocks.
         Continues until blocks reach a stable position or the game is over.
         """
-        if self.gameover == True:
+        if self.gameover is True:
             return
         same = self.pf.gaps()
         if not same:
@@ -144,7 +142,6 @@ class Sandtris:
         """
         Draws falling tetromino
         """
-        idx = 0
         for tag in self.tags:
             self.canvas.delete(tag)
         self.tags = []
@@ -176,7 +173,7 @@ class Sandtris:
             self.t.r -= 1
             self.pf.add_t(self.t)
             self.draw_pf()
-            if self.gravity_flag == False:
+            if self.gravity_flag is False:
                 self.sand_gravity()
             self.t = Sandtromino(random.randint(1, 7), scale=self.scale)
             self.draw_tetromino()
@@ -284,7 +281,7 @@ class Sandtris:
                 if self.lines >= self.level * 10:
                     self.level += 1
             self.draw_pf()
-            if self.gravity_flag == False:
+            if self.gravity_flag is False:
                 self.sand_gravity()
 
 

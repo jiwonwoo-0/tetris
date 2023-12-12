@@ -3,7 +3,6 @@ import tkinter as tk
 from playfield import Playfield
 from tetromino import Tetromino
 import random
-import time
 
 
 class Tetris:
