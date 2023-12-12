@@ -1,6 +1,7 @@
 import numpy as np
 
-class Sandtromino: 
+
+class Sandtromino:
     """
     Sandtromino piece
 
@@ -12,7 +13,8 @@ class Sandtromino:
         r (int): Row index of tetromino in the playfield
         c (int): Column index of tetromino in the playfield
     """
-    def __init__(self, letter, orientation = 0, scale = 3):
+
+    def __init__(self, letter, orientation=0, scale=3):
         """
         Initializes a Tetromino with a specified letter and orientation
 
@@ -23,14 +25,15 @@ class Sandtromino:
         """
         self.letter = letter
         self.scale = scale
-        self._shape_dict = {1:[[1,1,1,1]],
-                            2:[[2,0,0],[2,2,2]],
-                            3:[[0,0,3],[3,3,3]],
-                            4:[[4,4],[4,4]],
-                            5:[[0,5,5],[5,5,0]],
-                            6:[[0,6,0],[6,6,6]],
-                            7:[[7,7,0],[0,7,7]],
-                            }
+        self._shape_dict = {
+            1: [[1, 1, 1, 1]],
+            2: [[2, 0, 0], [2, 2, 2]],
+            3: [[0, 0, 3], [3, 3, 3]],
+            4: [[4, 4], [4, 4]],
+            5: [[0, 5, 5], [5, 5, 0]],
+            6: [[0, 6, 0], [6, 6, 6]],
+            7: [[7, 7, 0], [0, 7, 7]],
+        }
         self.orientation = orientation
         self.get_shape()
         self.r = 0
@@ -44,8 +47,8 @@ class Sandtromino:
         self.block = np.rot90(self.block, k=self.orientation)
         self.block = np.repeat(self.block, self.scale, axis=0)
         self.block = np.repeat(self.block, self.scale, axis=1)
-    
-    def rotate(self, k = 1):
+
+    def rotate(self, k=1):
         """
         Rotates the tetromino 90-degrees clockwise k times
 
@@ -54,4 +57,3 @@ class Sandtromino:
         """
         self.orientation += k
         self.block = np.rot90(self.block, k=k)
-

@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Playfield:
     """
     Playfield grid for tetris game
@@ -13,7 +14,7 @@ class Playfield:
         Initializes the Playfield with an empty 20x10 grid
         """
         self.pf = np.zeros((20, 10))
-    
+
     def add_t(self, t):
         """
         Adds a Tetromino to the playfield
@@ -23,9 +24,9 @@ class Playfield:
         """
         for i in range(t.block.shape[0]):
             for j in range(t.block.shape[1]):
-                if t.block[i,j] != 0:
-                    self.pf[i+t.r, j+t.c] = t.block[i,j]
-    
+                if t.block[i, j] != 0:
+                    self.pf[i + t.r, j + t.c] = t.block[i, j]
+
     def clear_line(self, rows):
         """
         Deletes lines from playfield
