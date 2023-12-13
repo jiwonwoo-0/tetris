@@ -19,7 +19,7 @@ These two games are built on Python. You can easily download Python by using [An
     scipy==1.11.4
 You can download the required packages by running the following code.
 
-    pip install -r requirement.txt
+    pip install -r requirements.txt
 
 ## Running Tetris
 
